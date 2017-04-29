@@ -12,8 +12,8 @@
 
 ## Project Presentation: 
 
-Please find [pdf](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4/Devops%20project.pdf)
-or [pptx](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4/Devops%20project.pptx)
+Please find [pdf](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4-%20CleanUp%20Monkey%20&%20Gremlin%20Monkey/Devops%20project.pdf)
+or [pptx](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4-%20CleanUp%20Monkey%20&%20Gremlin%20Monkey/Devops%20project.pptx)
 
 Please find presentation [screencast](https://www.youtube.com/watch?v=prwYZsg7wu4)
 
@@ -33,7 +33,7 @@ Please find presentation [screencast](https://www.youtube.com/watch?v=prwYZsg7wu
 
 ## Clean up monkey
 
- ![Architecture](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4/cleanup.png)
+ ![Architecture](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4-%20CleanUp%20Monkey%20&%20Gremlin%20Monkey/cleanup.png)
 
 
 ### Purpose:
@@ -52,7 +52,7 @@ Please find presentation [screencast](https://www.youtube.com/watch?v=prwYZsg7wu
    Clean up monkey will track the log files and if their size gets greater than limit then it copies those files to backup server and deletes them from running server
    
    
-   ![Architecture](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4/Z_Cleanup_monkey.png)
+   ![Architecture](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4-%20CleanUp%20Monkey%20&%20Gremlin%20Monkey/Z_Cleanup_monkey.png)
    
 ### Advantages:
      
@@ -66,7 +66,7 @@ Please find presentation [screencast](https://www.youtube.com/watch?v=prwYZsg7wu
    
  ## Gremlins Monkey
  
-   ![image](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4/gremlin.jpg)
+   ![image](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4-%20CleanUp%20Monkey%20&%20Gremlin%20Monkey/gremlin.jpg)
 
 ### Purpose: 
     - To enable gremlin testing for checkbox.io application
@@ -127,7 +127,7 @@ grunt.initConfig({
 ```
 Gruntfile should be present inside an applcaition folder in order to work this testing properly.
 Here is the screenshot for the test that we perfomed on Index.html page with first approach.<br><br>
-![Screenshot](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4/gremlin%20attack.png)<br><br>
+![Screenshot](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4-%20CleanUp%20Monkey%20&%20Gremlin%20Monkey/gremlin%20attack.png)<br><br>
 One of the challenging part about this monkey is getting the application testing logs. The logs which are generated after testing are available in browsers applcation log file which can be extracted easily by following the below instructions:<br>
 
 1. Firstly, we must enable logging for the browser
