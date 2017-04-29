@@ -14,18 +14,18 @@ The devOps pipeline including Configuration management, Build, test, analysis, d
 
 ## Index:
 
-1: Congiguration Management [mile1](https://github.ncsu.edu/ppfirake/DevOps_Project/tree/DevOps_Milestone1)
+1: Congiguration Management [mile1](https://github.com/pranav-firake/DevOps_Pipeline/tree/master/Mile1-%20CONFIGURATION_MANAGEMENT)
 
-2: Build Test & Analysis [mile2](https://github.ncsu.edu/ppfirake/DevOps_Project/tree/DevOps_Milestone2)
+2: Build Test & Analysis [mile2](https://github.com/pranav-firake/DevOps_Pipeline/tree/master/Mile2-%20BUILD%20TEST%20ANALYSIS)
 
-3: Deploy (CICD) [mile3](https://github.ncsu.edu/ppfirake/DevOps_Project/tree/DevOps_Milestone3)
+3: Deploy (CICD) [mile3](https://github.com/pranav-firake/DevOps_Pipeline/tree/master/Mile3-%20DEPLOY)
 
-4: Clean up monkey & Gremlin monkey [Special](https://github.ncsu.edu/ppfirake/DevOps_Project/tree/DevOps_Special) 
+4: Clean up monkey & Gremlin monkey [Special](https://github.com/pranav-firake/DevOps_Pipeline/tree/master/Mile4-%20CleanUp%20Monkey%20%26%20Gremlin%20Monkey) 
 
 ## Report: 
 
-Please find the report for whole pipeline at [pdf](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4/Devops%20project.pdf)
-or [pptx](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4/Devops%20project.pptx)
+Please find the report for whole pipeline at [pdf](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4-%20CleanUp%20Monkey%20&%20Gremlin%20Monkey/Devops%20project.pdf)
+or [pptx](https://github.com/pranav-firake/DevOps_Pipeline/blob/master/Mile4-%20CleanUp%20Monkey%20&%20Gremlin%20Monkey/Devops%20project.pptx)
 
 
 Please find presentation video at [Presentation](https://www.youtube.com/watch?v=prwYZsg7wu4)
