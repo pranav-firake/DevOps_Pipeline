@@ -44,12 +44,12 @@ Checkbox.io
 
 iTrust
 
-1. Configuration [iTrust screencast] (https://youtu.be/DiTDFWzsl7U)
+1. Configuration [iTrust screencast](https://youtu.be/DiTDFWzsl7U)
 2. Build [Build](https://www.youtube.com/watch?v=zqexYvXSg3g)
 3. Fuzzer [Fuzzer](https://www.youtube.com/watch?v=MAeK_EkoWLI)
 4. Useless Test Detector [Useless test](https://www.youtube.com/watch?v=quY7beqzPvY)
-5. Deploy [Deploy]https://www.youtube.com/watch?v=0JIn7IL5PU8&feature=youtu.be
-6. Rolling Updates [Rolling Updates]https://www.youtube.com/watch?v=0JIn7IL5PU8&feature=youtu.be
+5. Deploy [Deploy](https://www.youtube.com/watch?v=0JIn7IL5PU8&feature=youtu.be)
+6. Rolling Updates [Rolling Updates](https://www.youtube.com/watch?v=0JIn7IL5PU8&feature=youtu.be)
 
 
 Summary Presentation: [Presentation](https://www.youtube.com/watch?v=prwYZsg7wu4)
