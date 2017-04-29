@@ -1,0 +1,88 @@
+sakunker [11:37 PM] 
+---
+- name: Install Redis
+  hosts: ec2_instance
+  become: true
+  become_method: sudo
+  vars_files:
+   - vars.yaml
+  tasks:
+   - name: Install dependencies to make Redis source code
+     apt:
+       pkg: "{{ item }}"
+       state: present
+       update_cache: yes
+     with_items:
+      - gcc
+      - make
+      - libc6-dev
+
+  - name: Download Redis
+     get_url:
+       url: "{{ redis_download_url }}"
+       dest: /usr/local/src/redis-{{ redis_version }}.tar.gz
+       checksum: "sha1:{{ redis_checksum }}"
+
+  - name: Unarchive
+     unarchive:
+       src: /usr/local/src/redis-{{ redis_version }}.tar.gz
+       dest: /usr/local/src
+       remote_src: yes
+
+  - name: Create files
+     file:
+       path: /etc/redis
+       state: directory
+       mode: 0755
+
+  - name: Create files
+     file:
+       path: /var/run/redis
+       state: directory
+       mode: 0755
+
+  - name: Create files
+     file:
+       path: /var/lib/redis
+       state: directory
+       mode: 0755
+
+  - name: Compile src code
+     shell: make
+     args:
+       chdir: /usr/local/src/redis-{{ redis_version }}
+
+  - name: Install binaries
+     command: make install
+     args:
+       chdir: /usr/local/src/redis-{{ redis_version }}
+
+  - name: Create log directory
+     file:
+       state: directory
+       path: /var/log/redis
+       mode: 0755
+
+  - name: Create redis default config file
+     copy:
+       src: redis.default
+       dest: /etc/default/redis-server
+
+  - name: Create redis config file
+     copy:
+       src: redis.conf
+       dest: /etc/redis/
+
+  - name: Create redis init file
+     copy:
+       src: redis-init
+       dest: /etc/init.d/redis-server
+       mode: 0755
+
+  - name: Update rc
+     shell: update-rc.d redis-server defaults 20 10
+
+  - name: Start Redis Server
+     service:
+       name: redis-server
+       state: started

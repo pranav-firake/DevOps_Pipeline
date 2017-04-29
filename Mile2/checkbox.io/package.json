@@ -1,0 +1,28 @@
+{
+  "name": "Analysis",
+  "version": "0.0.1",
+  "description": "analysis",
+  "main": "analysis.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.ncsu.edu/CSC510-Fall2014/Analysis.git"
+  },
+  "keywords": [
+    "static",
+    "dynamic"
+  ],
+  "author": "you",
+  "license": "ISC",
+  "devDependencies": {
+    "escodegen": "^1.4.1",
+    "esprima": "^1.2.2"
+  },
+  "dependencies": {
+    "glob": "^7.1.1",
+    "wrappy": "~1.0.2",
+    "brace-expansion" : "1.1.6"
+  }
+}

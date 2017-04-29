@@ -1,0 +1,111 @@
+---
+- hosts: nodes
+  remote_user: root
+  sudo: yes
+
+  tasks:
+  - name: update package manager
+    apt:
+      update_cache: yes
+
+  - name: install Java
+    apt_repository:
+                repo: 'ppa:webupd8team/java'
+
+
+  - name: auto accept oracle jdk license
+    shell: echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+    sudo: yes
+
+  - name: install java8
+    shell: apt install -y oracle-java8-installer ca-certificates
+    sudo: yes
+
+
+  - name: install maven
+    apt_repository:
+                repo: 'ppa:andrei-pozolotin/maven3'
+
+  - name: install mavn3 version
+    apt:
+      name: maven3
+      state: installed
+
+  - name: updating
+    apt:
+     update_cache: yes
+
+  - name: Install Mysql
+    apt: pkg=mysql-server state=latest update_cache=true
+
+  - name: Mysql | Set root password
+    debconf: name='mysql-server' question='mysql-server/root_password' value='' vtype='password'
+
+  - name: Mysql | Set root repassword
+    debconf: name='mysql-server' question='mysql-server/root_password_again' value='' vtype='password'
+
+  - name: update package manager
+    apt:
+      update_cache: yes
+
+  - name: Remove MySQL case sensitivity
+    copy: src=my.cnf dest=/etc/mysql
+
+  - name: Restart MySQL service
+    service: name=mysql state=restarted
+
+
+  - name: Maven settings
+    copy: src=settings.xml dest=/usr/share/maven3/conf
+
+
+  - name: install nginx
+    apt:
+      name: nginx
+      state: installed
+      update_cache: yes
+
+  - name: add key
+    apt_key:
+          validate_certs: false
+          url: "https://jenkins-ci.org/debian/jenkins-ci.org.key"
+          state: present
+
+  - name: source list
+    shell: "sh -c 'echo deb http://pkg.jenkins-ci.org/debian binary/ > /etc/apt/sources.list.d/jenkins.list'"
+
+  - name: update package manager
+    apt:
+      update_cache: yes
+
+  - name: install jenkins
+    apt:
+      name: jenkins
+      state: installed
+      update_cache: yes
+
+  - name: Copy the config.xml file
+    copy: src=/home/vagrant/configTest.xml dest=/home/config.xml
+
+  - name: Ensure jenkins is running
+    service:
+      name: jenkins
+      state: started
+    when: ansible_os_family == "RedHat" or ansible_os_family == "FreeBSD" or ansible_os_family == "Debian"
+
+  - name: waiting for 25 seconds
+    pause:
+         seconds: 15
+
+  - name: Install Jenkins plugin
+    become_user: root
+    script: /home/vagrant/pluginJenkins.sh
+
+
+  - name: update package manager
+    apt:
+      update_cache: yes
+
+  - name: create and build Jenkins job
+    become_user: root
+    script: /home/vagrant/testJob.sh

@@ -1,0 +1,145 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:    
+    - name: Provision of instance
+      ec2:      
+         aws_access_key: {{ lookup('env', 'AK') }}
+         aws_secret_key: {{ lookup('env', 'SK') }}
+         key_name: ajaykey
+         instance_type: t2.micro
+         image: ami-01f05461
+         wait: yes
+         wait_timeout: 600
+         group_id: sg-bfda87c6
+         assign_public_ip: yes
+         vpc_subnet_id: subnet-7be7dc0d
+         region: us-west-2
+         exact_count: 1
+         count_tag:
+            Name: yjaychandra
+         instance_tags:
+            Name: yjaychandra
+      register: ec
+   
+    - name: remotely logging in using SSH
+      add_host:
+       hostname: "{{ec.instances[0].public_ip}}" 
+       groupname: ec2_instance
+       ansible_ssh_user: ubuntu
+       ansible_ssh_private_key_file: ajaykey.pem
+
+    - name: wait for the instance to start
+      wait_for:
+       host: "{{ec.instances[0].public_ip}}"
+       port: 22
+       state: started
+
+- name: Configuring the New Production environment
+  hosts: ec2_instance
+  sudo: yes
+
+  vars:
+   - githubuser: "{{ lookup('env', 'GIT_USER') }}"
+   - githubpassword: "{{ lookup('env', 'GIT_PASSWORD') }}"
+
+  tasks:
+  - name: update package manager
+    apt:
+      update_cache: yes
+
+  - name: install Java
+    apt_repository:
+                repo: 'ppa:webupd8team/java'
+
+
+  - name: auto accept oracle jdk license
+    shell: echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+    sudo: yes
+
+  - name: install java8
+    shell: apt install -y oracle-java8-installer ca-certificates
+    sudo: yes
+
+
+  - name: install maven
+    apt_repository:
+                repo: 'ppa:andrei-pozolotin/maven3'
+
+  - name: install mavn3 version
+    apt:
+      name: maven3
+      state: installed
+
+  - name: updating
+    apt:
+     update_cache: yes
+
+  - name: Install Mysql
+    apt: pkg=mysql-server state=latest update_cache=true
+
+  - name: Mysql | Set root password
+    debconf: name='mysql-server' question='mysql-server/root_password' value='' vtype='password'
+
+  - name: Mysql | Set root repassword
+    debconf: name='mysql-server' question='mysql-server/root_password_again' value='' vtype='password'
+
+
+  - name: update package manager
+    apt:
+      update_cache: yes
+
+
+  - name: Download Tomcat
+    get_url: url=http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.0.M17/bin/apache-tomcat-9.0.0.M17.tar.gz dest=/opt/
+
+  - name: make tomcat9 dir
+    become_user: root
+    script: tomcat.sh
+
+  - name: Unarchive Tomcat
+    unarchive: src=/opt/apache-tomcat-9.0.0.M17.tar.gz dest=/opt/tomcat9 remote_src=True
+
+  - name: Configure tomcat environment variables
+    become_user: root
+    script: tomcatConfig.sh
+
+  - name: Configure Tomcat users
+    template: src=tomcat-users.xml dest=/opt/tomcat9/apache-tomcat-9.0.0.M17/conf/
+
+  - name: Install Tomcat init script
+    copy: src=tomcat-initscript.sh dest=/etc/init.d/tomcat mode=0755
+
+  - name: Remove permissions on tomcat
+    copy: src=context.xml dest=/opt/tomcat9/apache-tomcat-9.0.0.M17/webapps/manager/META-INF
+
+  - name: Start Tomcat
+    service: name=tomcat state=started enabled=yes
+
+  - name: Remove MySQL case sensitivity
+    copy: src=my.cnf dest=/etc/mysql
+
+  - name: Restart MySQL service
+    service: name=mysql state=restarted
+
+  - name: copying Manager.xml into destination
+    copy: src=manager.xml dest=/opt/tomcat9/apache-tomcat-9.0.0.M17/conf/Catalina/localhost
+
+  - name: Maven settings
+    copy: src=settings.xml dest=/usr/share/maven3/conf
+
+
+  - name: Install git
+    apt: name=git state=present
+
+  - name: Git clone
+    become_user: root
+    git: repo=https://{{ githubuser }}:{{ githubpassword }}@github.ncsu.edu/snarasi5/iTrust-v23.git dest=/root/iTrust-v23
+
+  - name: Load DB data
+    become_user: root
+    script: loadDB.sh
+
+  - name: Deploy iTrust (copy war package)
+    copy: src=/var/lib/jenkins/workspace/buildJob/iTrust/target/iTrust-23.0.0.war dest=/opt/tomcat9/apache-tomcat-9.0.0.M17/webapps/iTrust.war

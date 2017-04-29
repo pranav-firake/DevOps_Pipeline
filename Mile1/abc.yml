@@ -1,0 +1,98 @@
+---
+
+- hosts: node0
+  remote_user: root
+
+  sudo: yes
+  vars:
+     dbuser: "{{ lookup('env','MONGO_USER')}}"
+     dbpwd: "{{ lookup('env','MONGO_PWD')}}"
+  tasks:
+  - name: Installing nodejs
+    apt: name=nodejs state=present
+
+  - name: Installing git package for cloning repository
+    apt: name=git state=present update_cache=true
+    
+  - name: apt update again
+    apt:
+      update_cache: yes
+	  
+  - name: Installing nginx
+    apt:
+      name: nginx
+      state: installed
+      update_cache: yes
+	  
+  - name: Installing pip
+    apt:
+      name: python-pip
+      state: installed
+	  
+  - name: Clone git repository
+    git: >
+     dest=/vagrant_data/checkbox.io
+     repo=https://github.com/pranav-firake/checkbox.io.git
+     update=yes 
+	 
+  - name: apt update again
+    apt:
+      update_cache: yes
+  - name: Installing npm package
+    apt: name=npm state=present update_cache=true path= /vagrant_data/checkbox.io/server-side/site
+  - name: Installing Dotenv
+    shell: "sudo npm install dotenv"
+  - name: copying nginx config 
+    template: src=/vagrant_data/checkbox.io/local-conf/nginx.conf dest=/etc/nginx/nginx.conf mode=0444 backup=no force=yes
+    become: yes
+  - name: copying nginx default 
+    template: src=/vagrant_data/checkbox.io/local-conf/default dest=/etc/nginx/sites-available/default mode=0444 backup=no force=yes
+    become: yes
+  - name: Restart nginx with new settings
+    service: name=nginx state=restarted
+    become: yes
+  - name: start the mongod service
+    service: name=mongod state=stopped
+    become: yes
+    ignore_errors: yes
+  - name: Install Repository keys
+    apt_key: state=present keyserver=keyserver.ubuntu.com id=7F0CEB10
+    become: yes
+  - name: Install MongoDB repository
+    apt_repository: repo='deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse' state=present
+    become: yes
+  - name: Install MongoDB
+    apt: name=mongodb-org state=latest update_cache=true cache_valid_time=600
+    become: yes
+  - name: Set the permissions on the specified data directory
+    file: path=/data/db1 owner=vagrant group=mongodb mode=0775 state=absent
+    become: yes
+  - name: Set the permissions on the specified data directory
+    file: path=/data/db1 owner=vagrant group=mongodb mode=0775 state=directory
+    become: yes
+  - name: Copy the custom configuration file into /etc to point to new db
+    template: src=/vagrant_data/mongod.conf dest=/etc/mongod.conf mode=0444 force=yes
+    become: yes
+  - name: start the mongod service
+    service: name=mongod state=started
+    become: yes
+  - name: add the admin user
+    mongodb_user: database=admin name={{ dbuser }} password={{ dbpwd}} login_port=27017 state=present
+	roles=userAdminAnyDatabase,readWriteAnyDatabase,dbAdminAnyDatabase,clusterAdmin
+    become: yes
+    ignore_errors: yes
+  - name: restart the mongod service
+    service: name=mongod state=restarted
+    become: yes
+  - name: "Install forever (to run Node.js app)."
+    npm: name=forever global=yes state=present
+    become: yes
+  - name: "Check list of Node.js apps running."
+    command: forever list
+    register: forever_list
+    changed_when: false
+  - name: "Start example Node.js app."
+    command: forever start -o out.log -e err.log  server.js
+    args:
+        chdir: /vagrant_data/checkbox.io/server-side/site/
+    when: "forever_list.stdout.find('/vagrant_data/checkbox.io/server-side/site/server.js') == -1"

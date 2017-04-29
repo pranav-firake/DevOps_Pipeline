@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+ <actions/>
+ <description>Building Jenkins</description>
+ <keepDependencies>false</keepDependencies>
+ <properties>
+   <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.26.2">
+     <projectUrl>https://github.ncsu.edu/snarasi5/iTrust-v23/</projectUrl>
+     <displayName></displayName>
+   </com.coravy.hudson.plugins.github.GithubProjectProperty>
+ </properties>
+ <scm class="hudson.plugins.git.GitSCM" plugin="git@3.2.0">
+   <configVersion>2</configVersion>
+   <userRemoteConfigs>
+     <hudson.plugins.git.UserRemoteConfig>
+       <url>https://github.ncsu.edu/snarasi5/iTrust-v23/</url>
+       <credentialsId>87de179a-17b4-4c49-abe2-4e367d19ee6e</credentialsId>
+     </hudson.plugins.git.UserRemoteConfig>
+   </userRemoteConfigs>
+   <branches>
+     <hudson.plugins.git.BranchSpec>
+       <name>*/master</name>
+     </hudson.plugins.git.BranchSpec>
+   </branches>
+   <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+   <submoduleCfg class="list"/>
+   <extensions/>
+ </scm>
+ <canRoam>true</canRoam>
+ <disabled>false</disabled>
+ <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+ <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+ <authToken>a75fa3742226113933e146bbf77da3fe</authToken>
+ <triggers/>
+ <concurrentBuild>false</concurrentBuild>
+ <builders>
+   <hudson.tasks.Shell>
+     <command>cd iTrust
+sudo mvn package
+cd /home/ubuntu
+sudo ansible-playbook provision.yml
+</command>
+   </hudson.tasks.Shell>
+ </builders>
+ <publishers/>
+ <buildWrappers/>
+</project>

@@ -1,0 +1,11 @@
+---
+- hosts: nodes
+  remote_user: root
+  sudo: yes
+
+  tasks:
+
+
+  - name: Make useless tests report
+    become_user: root
+    script: /home/vagrant/uselessJob.sh

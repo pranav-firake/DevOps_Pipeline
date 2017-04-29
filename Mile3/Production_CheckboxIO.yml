@@ -1,0 +1,99 @@
+---
+- name: Final Deployment
+  hosts: prod
+  sudo: yes
+  tasks:
+
+  - name: Installing nodejs
+    apt: name=nodejs-legacy state=present
+
+  - name: Installing git
+    apt: name=git state=present update_cache=true
+    
+  - name: apt update again
+    apt:
+      update_cache: yes
+      
+  - name: Installing nginx
+    apt:
+      name: nginx
+      state: installed
+      update_cache: yes
+      
+  - name: Installing pip
+    apt:
+      name: python-pip
+      state: installed
+      
+  - name: Installing python mongo
+    pip:
+      name: pymongo
+      
+  - name: Clone git repository
+    git: >
+     dest=/vagrant_data/cb
+     repo=https://github.com/pranav-firake/cb.git
+     update=yes
+     
+  - name: Install npm
+    apt: name=npm state=present
+    
+  - name: Installing NPM package
+    npm: path=/vagrant_data/cb/server-side/site
+    
+  - name: copying nginx config
+    template: src=/home/ubuntu/nginx.conf dest=/etc/nginx/nginx.conf mode=0444 backup=no force=yes
+    
+  - name: copying nginx defaulit
+    template: src=/home/ubuntu/default dest=/etc/nginx/sites-available/default mode=0444 backup=no force=yes
+    become: yes
+    
+  - name: Restart nginx
+    service: name=nginx state=restarted
+    become: yes
+    
+  - name: Install Repository keys
+    apt_key: state=present keyserver=keyserver.ubuntu.com id=7F0CEB10
+    become: yes
+    
+  - name: Install MongoDB repository
+    apt_repository: repo='deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse' state=present
+    become: yes
+    
+  - name: Install MongoDB
+    apt: name=mongodb-org state=latest update_cache=true cache_valid_time=600
+    become: yes
+    
+  - name: Set the permissions for specified data directory
+    file: path=/data/db1 owner=ubuntu group=mongodb mode=0775 state=absent
+    become: yes
+    
+  - name: Set the permissions for specified data directory
+    file: path=/data/db1 owner=ubuntu group=mongodb mode=0775 state=directory
+    become: yes
+    
+  - name: Copy the custom configuration file into /etc to point to new db
+    template: src=/home/ubuntu/mongod.conf dest=/etc/mongod.conf mode=0444 force=yes
+    become: yes
+    
+  - name: start the mongod service
+    service: name=mongod state=started
+    become: yes
+    
+  - name: add admin user
+    mongodb_user: database=admin name=<db_username> password=<db_password> login_port=27017 state=present roles=userAdminAnyDatabase,readWriteAnyDatabase,dbAdminAnyDatabase,clusterAdmin
+    ignore_errors: yes
+    
+  - name: Install forever
+    npm: name=forever global=yes state=present
+    
+  - name: Get list of Node.js apps already running if any
+    command: forever list
+    register: forever_list
+    changed_when: false
+    
+  - name: Execute Node server.js application
+    command: forever start -o out.log -e err.log  server.js
+    args:
+       chdir: /vagrant_data/cb/server-side/site/
+    when: "forever_list.stdout.find('/vagrant_data/checkbox.iorepo-/server-side/site/server.js') == -1"	

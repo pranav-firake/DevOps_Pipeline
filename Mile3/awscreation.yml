@@ -1,0 +1,40 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+
+
+   - name: Provision of instance
+     ec2:
+
+        aws_access_key: <AWS_ACCESS_KEY>
+        aws_secret_key: <AWS_SECRET_KEY>
+        key_name: <key_name>
+        instance_type: t2.micro
+        image: <image_name>
+        wait: yes
+        wait_timeout: 600
+        group_id: <GROUP_ID>
+        assign_public_ip: yes
+        vpc_subnet_id: <SUBNET_ID>
+        region: us-west-2
+        exact_count: 1
+        count_tag:
+         Name: <name>
+        instance_tags:
+         Name: <name>
+     register: ec
+
+   - name: remotely logging in using SSH
+     add_host:
+       hostname: "{{ec.instances[0].public_ip}}"
+       groupname: ec2_instance
+       ansible_ssh_user: ubuntu
+       ansible_ssh_private_key_file: <key_file>
+
+   - name: wait for the instance to start
+     wait_for:
+       host: "{{ec.instances[0].public_ip}}"
+       port: 22
+       state: started

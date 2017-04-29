@@ -1,0 +1,12 @@
+---
+- hosts: EC2
+  remote_user: root
+  sudo: yes
+
+  tasks:
+
+  - name: Install grunt
+    npm: name= grunt state= present
+
+  - name: Install grunt gremlins
+    npm: name= grunt-gremlins state= present

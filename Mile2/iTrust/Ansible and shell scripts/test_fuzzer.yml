@@ -1,0 +1,47 @@
+---
+- hosts: nodes
+  remote_user: root
+  sudo: yes
+
+
+  vars_prompt:
+  - name: "githubuser"
+    prompt: "Enter your github username"
+    private: no
+  - name: "githubpassword"
+    prompt: "Enter your github password"
+    private: yes
+
+  tasks:
+
+
+  - name: Install Nodejs
+    apt: name=git state=present
+
+
+  - name: Install git
+    apt: name=git state=present
+
+  - name: Git clone
+    become_user: root
+    git: repo=https://{{ githubuser }}:{{ githubpassword }}@github.ncsu.edu/snarasi5/iTrust-v23.git dest=/root/test/iTrust-v23
+
+  - name: checkout testcases branch
+    become_user: root
+    script: /home/vagrant/checkoutBranch.sh
+
+  - name: Install NPM packages based on package.json
+    become_user: root
+    npm: path=/root/test/iTrust-v23/iTrust/
+
+  - name: Copy post-commit
+    become_user: root
+    copy: src=post-commit dest=/root/test/iTrust-v23/.git/hooks/ mode=777
+
+
+  - name: Copy the config.xml file
+    copy: src=/home/vagrant/configTest.xml dest=/home/config.xml
+
+  - name: Run Fuzzer
+    become_user: root
+    shell: node /root/test/iTrust-v23/iTrust/fuzzing.js

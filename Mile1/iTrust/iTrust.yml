@@ -1,0 +1,116 @@
+---
+- hosts: nodes
+  remote_user: root
+  sudo: yes
+  
+  
+  vars_prompt:
+  - name: "githubuser"
+    prompt: "Enter your github username"
+    private: no
+  - name: "githubpassword"
+    prompt: "Enter your github password"
+    private: yes
+
+  tasks:
+  - name: update package manager
+    apt:
+      update_cache: yes
+
+  - name: install Java
+    apt_repository:
+                repo: 'ppa:webupd8team/java'
+
+
+  - name: auto accept oracle jdk license
+    shell: echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+    sudo: yes
+
+  - name: install java8
+    shell: apt install -y oracle-java8-installer ca-certificates
+    sudo: yes
+
+
+  - name: install maven
+    apt_repository:
+                repo: 'ppa:andrei-pozolotin/maven3'
+
+  - name: install mavn3 version
+    apt:
+      name: maven3
+      state: installed
+
+  - name: updating
+    apt:
+     update_cache: yes
+
+  - name: Install Mysql
+    apt: pkg=mysql-server state=latest update_cache=true
+
+  - name: Mysql | Set root password
+    debconf: name='mysql-server' question='mysql-server/root_password' value='' vtype='password'
+
+  - name: Mysql | Set root repassword
+    debconf: name='mysql-server' question='mysql-server/root_password_again' value='' vtype='password'
+
+
+  - name: update package manager
+    apt:
+      update_cache: yes
+
+
+  - name: Download Tomcat
+    get_url: url=http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.0.M17/bin/apache-tomcat-9.0.0.M17.tar.gz dest=/opt/
+
+  - name: make tomcat9 dir
+    become_user: root
+    script: tomcat.sh
+
+  - name: Unarchive Tomcat
+    unarchive: src=/opt/apache-tomcat-9.0.0.M17.tar.gz dest=/opt/tomcat9 remote_src=True
+
+  - name: Configure tomcat environment variables
+    become_user: root
+    script: tomcatConfig.sh
+
+  - name: Configure Tomcat users
+    template: src=tomcat-users.xml dest=/opt/tomcat9/apache-tomcat-9.0.0.M17/conf/
+
+  - name: Install Tomcat init script
+    copy: src=tomcat-initscript.sh dest=/etc/init.d/tomcat mode=0755
+
+  - name: Remove permissions on tomcat
+    copy: src=context.xml dest=/opt/tomcat9/apache-tomcat-9.0.0.M17/webapps/manager/META-INF
+
+  - name: Start Tomcat
+    service: name=tomcat state=started enabled=yes
+
+  - name: Remove MySQL case sensitivity
+    copy: src=my.cnf dest=/etc/mysql
+
+  - name: Restart MySQL service
+    service: name=mysql state=restarted
+
+  - name: copying Manager.xml into destination
+    copy: src=manager.xml dest=/opt/tomcat9/apache-tomcat-9.0.0.M17/conf/Catalina/localhost
+
+  - name: Maven settings
+    copy: src=settings.xml dest=/usr/share/maven3/conf
+
+
+  - name: Install git
+    apt: name=git state=present
+
+  - name: Git clone
+    become_user: root
+    git: repo=https://{{ githubuser }}:{{ githubpassword }}@github.ncsu.edu/snarasi5/iTrust-v23.git dest=/root/iTrust-v23
+
+  - name: Maven package
+    become_user: root
+    script: maven.sh
+
+  - name: Maven deploy
+    become_user: root
+    script: maven-deploy.sh
+
+

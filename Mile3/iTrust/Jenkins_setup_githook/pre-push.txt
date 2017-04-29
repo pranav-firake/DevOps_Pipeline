@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/bin/curl -X POST --user admin:b1dc81585b514512abd08941bfc73407 http://54.200.177.148:8080/job/newBuildJob/build?token=a75fa3742226113933e146bbf77da3fe

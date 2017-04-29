@@ -1,0 +1,5 @@
+
+prod1 ansible_ssh_host=54.218.226.213 ansible_ssh_user=ubuntu ansible_ssh_private_key_file=<pem>
+prod2 ansible_ssh_host=54.202.167.219 ansible_ssh_user=ubuntu ansible_ssh_private_key_file=<pem>
+jenkins ansible_ssh_host=54.218.55.189 ansible_ssh_user=ubuntu ansible_ssh_private_key_file=<pem>
+slave ansible_ssh_host=54.191.135.238 ansible_ssh_user=ubuntu ansible_ssh_private_key_file=<pem>

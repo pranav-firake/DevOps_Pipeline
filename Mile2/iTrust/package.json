@@ -1,0 +1,27 @@
+{
+  "name": "hello-node",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "esprima": "~1.0.4",
+    "esprima-ast-utils": "^0.0.6",
+    "file": "latest",
+    "ldclient-node": "^3.0.3",
+    "line-by-line": "latest",
+    "line-reader-sync": "latest",
+    "fuzzer": "^0.2.0",
+    "request": "^2.67.0",
+    "random-js": "^1.0.4",
+    "slash": "latest",
+    "sleep": "^5.1.0",
+    "then": "0.0.1",
+    "xml2json": "^0.11.0",
+    "xmljson" : "0.2.0"
+
+  }
+}

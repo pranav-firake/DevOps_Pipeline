@@ -1,0 +1,146 @@
+---
+- hosts: all
+  remote_user: root
+  become: true
+  tasks:
+  - name: Running the apt-get command
+    sudo: yes
+    apt: update_cache=yes
+  - shell: curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+  - name: Installing Nodejs
+    sudo: yes
+    apt: name=nodejs state=present
+  - name: Installing nginx
+    sudo: yes
+    apt: pkg=nginx state=installed update_cache=true
+  - name: Add Mongo packages repo
+    sudo: yes
+    apt_key: id=EA312927  keyserver=keyserver.ubuntu.com
+  - name: add repo itself
+    sudo: yes
+    apt_repository: repo='deb http://repo.mongodb.org/apt/ubuntu {{ansible_distribution_release}}/mongodb-org/3.2 multiverse' state=present
+  - name: install packages
+    sudo: yes
+    apt: pkg=mongodb-org state=present force=yes
+  - shell: sudo apt-get install python-setuptools
+  - name: Installing pymongo
+    shell: pip install pymongo
+  - mongodb_user:
+      database: admin
+      name: admin
+      password: admin
+      roles: readWrite,dbAdmin,userAdmin
+      state: present
+  - git: repo=https://github.com/pranav-firake/checkbox.iorepo- dest=/home/vagrant/checkboxio
+  - name : Install npm package
+    shell: npm install
+    args:
+      chdir: /home/vagrant/checkboxio/server-side/site/
+  - name : cp nginx config files
+    shell: sudo cp /home/vagrant/checkboxio/local-conf/default /etc/nginx/sites-available/
+  - name : cp nginx config files
+    shell: sudo cp /home/vagrant/checkboxio/local-conf/nginx.conf /etc/nginx/
+  - name : reload nginx
+    shell : sudo nginx -s reload
+  - name: Install "forever" node.js package globally.
+    npm: name=forever global=yes state=present
+    sudo: yes
+  - name: "Install forever (to run Node.js app)."
+    npm: name=forever global=yes state=present
+    become: yes
+  - name: "Check list of Node.js apps running."
+    command: forever list
+    register: forever_list
+    changed_when: false
+# Setup runtime packages
+  - name: Setting up Directory for Java8
+    apt_repository:
+                 repo: 'ppa:webupd8team/java'
+
+  - name: Installing Git
+    apt:
+       name: git
+       state: installed
+
+  - name: Automatically accept oracle jdk license
+    shell: echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+    sudo: yes
+
+  - name: Install java8
+    shell: apt install -y oracle-java8-installer ca-certificates
+    sudo: yes
+  - name: Setting up Directory for Maven 3.3.0
+    apt_repository:
+                 repo: 'ppa:andrei-pozolotin/maven3'
+  - name: Install maven version
+    apt:
+      name: maven3
+      state: installed
+  - name: Install jenkins
+    apt:
+      name: jenkins
+      state: present
+  - name: First start jenkins
+    service:
+          name: jenkins
+          state: started
+          enabled: yes
+  - name: Changes in the config file - make use security false
+    lineinfile:
+             dest: /var/lib/jenkins/config.xml
+             regexp: '^  <useSecurity>'
+             line: '  <useSecurity>false</useSecurity>'
+  - name: Changes in the config file - delete auth security
+    lineinfile:
+             dest: /var/lib/jenkins/config.xml
+             regexp: '^  <authorizationStrategy'
+             state: absent
+  - name: Changes in the config file - delete read restriction
+    lineinfile:
+             dest: /var/lib/jenkins/config.xml
+             regexp: '^    <denyAnonymousReadAccess>'
+             state: absent
+
+  - name: Changes in the config file - delete read restriction
+    lineinfile:
+             dest: /var/lib/jenkins/config.xml
+             regexp: '^    <denyAnonymousReadAccess>'
+             state: absent
+  - name: Changes in the config file - delete auth strategy
+    lineinfile:
+             dest: /var/lib/jenkins/config.xml
+             regexp: '^  </authorizationStrategy>'
+             state: absent
+  - name: Changes in the config file - delete security realm
+    lineinfile:
+             dest: /var/lib/jenkins/config.xml
+             regexp: '^  <securityRealm'
+             state: absent
+  - name: Changes in the config file - disable signup to jenkins
+    lineinfile:
+             dest: /var/lib/jenkins/config.xml
+             regexp: '^    <disableSignup>'
+             state: absent
+  - name: Changes in the config file - delete captcha requirement
+    lineinfile:
+             dest: /var/lib/jenkins/config.xml
+             regexp: '^    <enableCaptcha>'
+             state: absent
+  - name: Changes in the config file - delete security realm
+    lineinfile:
+             dest: /var/lib/jenkins/config.xml
+             regexp: '^  </securityRealm>'
+             state: absent
+  - name: Restart jenkins
+    service:
+          name: jenkins
+          state: restarted
+  - name: Jenkins still alive
+    uri: url="http://192.168.33.18:8080" status_code=200
+    register: result
+    until: result.status == 200
+    retries: 20
+    delay: 1
+  - name: create job
+    become_user: root
+    script: /home/vagrant/check.sh
